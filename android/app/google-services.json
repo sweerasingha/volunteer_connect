@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "875280985769",
+    "project_id": "volunteer-connect-4664c",
+    "storage_bucket": "volunteer-connect-4664c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875280985769:android:183c2cf3a7ed61137dc3b8",
+        "android_client_info": {
+          "package_name": "patio.volunteer_connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBctthx5jx_jQ7BtarrnAigxwixLyAoFeA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
