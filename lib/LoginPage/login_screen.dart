@@ -1,8 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vc_v1/ForgetPassword/forget_password_screen.dart';
 import 'package:vc_v1/Services/global_variables.dart';
+import 'package:vc_v1/SignUpPage/signup_screen.dart';
 
 import '../Services/global_methods.dart';
 
@@ -29,6 +31,9 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
   @override
   void dispose() {
     _animationController.dispose();
+    _emailTextController.dispose();
+    _passTextController.dispose();
+    _passFocusNode.dispose();
     super.dispose();
   }
 
@@ -244,7 +249,35 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                                   ]
                                 ),
                               )
-                            )
+                            ),
+                            const SizedBox(height: 40,),
+                            Center(
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(
+                                      text: 'Don\'t have an account? ',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const TextSpan(text: '  '),
+                                    TextSpan(
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp())),
+                                      text: 'Sign Up',
+                                      style: const TextStyle(
+                                        color: Colors.cyan,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]
+                                )
+                              )
+                            ),
                           ],
                         ),
                       ),
