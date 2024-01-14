@@ -1,18 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:vc_v1/Widgets/bottom_nav_bar.dart';
-import 'package:vc_v1/user_state.dart';
 
-class JobScreen extends StatefulWidget {
+import '../Widgets/bottom_nav_bar.dart';
+
+class AllWorkersScreen extends StatefulWidget {
 
   @override
-  State<JobScreen> createState() => _JobScreenState();
+  State<AllWorkersScreen> createState() => _AllWorkersScreenState();
 }
 
-class _JobScreenState extends State<JobScreen> {
-
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
+class _AllWorkersScreenState extends State<AllWorkersScreen> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -25,16 +21,16 @@ class _JobScreenState extends State<JobScreen> {
         ),
       ),
       child: Scaffold(
-        bottomNavigationBar: BottomNavigationBarForApp(indexNum: 0),
+        bottomNavigationBar: BottomNavigationBarForApp(indexNum: 1,),
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text(
-            "Volunteer Connect",
+            "All Workers Screen",
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Signatra'
+                color: Colors.white,
+                fontSize: 30,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Signatra'
             ),
           ),
           centerTitle: true,
@@ -49,7 +45,7 @@ class _JobScreenState extends State<JobScreen> {
             ),
           ),
         ),
-        ),
-      );
+      ),
+    );
   }
 }
