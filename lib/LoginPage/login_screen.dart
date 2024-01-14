@@ -1,7 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:vc_v1/ForgetPassword/forget_password_screen.dart';
 import 'package:vc_v1/Services/global_variables.dart';
+
+import '../Services/global_methods.dart';
 
 class Login extends StatefulWidget {
 
@@ -18,7 +21,9 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
   final TextEditingController _passTextController = TextEditingController(text: '');
 
   final FocusNode _passFocusNode = FocusNode();
+  bool _isLoading = false;
   bool _obscureText = true;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _loginFormKey = GlobalKey<FormState>();
 
   @override
@@ -44,6 +49,32 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
     });
     _animationController.forward();
     super.initState();
+  }
+
+  void _submitFormOnLogin() async
+  {
+    final isValid = _loginFormKey.currentState!.validate();
+    if (isValid) {
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await _auth.signInWithEmailAndPassword(
+          email: _emailTextController.text.trim().toLowerCase(),
+          password: _passTextController.text.trim(),
+        );
+        Navigator.canPop(context) ? Navigator.pop(context) : null;
+      } catch (error) {
+        setState(() {
+          _isLoading = false;
+        });
+        GlobalMethod.showErrorDialog(error: error.toString(), ctx: context);
+        print('Error occured ${error.toString()}');
+      }
+    }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -136,7 +167,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                               decoration: InputDecoration(
                                 suffixIcon: GestureDetector(
                                   onTap: () {
-                                    // Update the state i.e. toogle the state of passwordVisible variable
+                                    // Update the state i.e. toggle the state of passwordVisible variable
                                     setState(() {
                                       _obscureText = !_obscureText;
                                     });
@@ -186,6 +217,33 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                                   ),
                                 ),
                               ),
+                            ),
+                            const SizedBox(height: 10,),
+                            MaterialButton(
+                              onPressed: () {
+                                _submitFormOnLogin();
+                              },
+                              color: Colors.cyan,
+                              elevation: 8,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(11),
+                              ),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    )
+                                  ]
+                                ),
+                              )
                             )
                           ],
                         ),
