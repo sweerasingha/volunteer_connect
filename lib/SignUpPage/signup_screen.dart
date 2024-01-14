@@ -1,10 +1,14 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:vc_v1/Services/global_methods.dart';
 import 'package:vc_v1/Services/global_variables.dart';
 
 class SignUp extends StatefulWidget {
@@ -31,11 +35,22 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
   final _signUpFormKey = GlobalKey<FormState>();
   bool _obscureText = true;
   File? imageFile;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool _isLoading = false;
+  String? imageUrl;
 
   @override
   void dispose() {
     _animationController.dispose();
+    _fullNameController.dispose();
+    _emailTextController.dispose();
+    _passTextController.dispose();
+    _phoneNumberController.dispose();
+    _locationController.dispose();
+    _emailFocusNode.dispose();
+    _passFocusNode.dispose();
+    _phoneNumberFocusNode.dispose();
+    _positionCPFocusNode.dispose();
     super.dispose();
   }
 
@@ -65,7 +80,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
       builder: (context)
         {
           return AlertDialog(
-            title: Text('Please choose an option'),
+            title: const Text('Please choose an option'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -73,7 +88,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                   onTap: (){
                     _getFromCamera();
                     },
-                  child: Row(
+                  child: const Row(
                     children: [
                       Padding(
                         padding:EdgeInsets.all(4.0),
@@ -96,7 +111,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                   onTap: (){
                     _getFromGallery();
                   },
-                  child: Row(
+                  child: const Row(
                     children: [
                       Padding(
                         padding:EdgeInsets.all(4.0),
@@ -146,6 +161,63 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
         imageFile = File(croppedImage.path);
       });
     }
+  }
+
+  void _submitFormOnSignUp() async
+  {
+    final isValid = _signUpFormKey.currentState!.validate();
+    if (isValid)
+      {
+        if (imageFile == null)
+          {
+            GlobalMethod.showErrorDialog(
+              error: 'Please pick an image',
+              ctx: context,
+            );
+            return;
+          }
+
+         setState(() {
+            _isLoading = true;
+         });
+
+        try
+            {
+              await _auth.createUserWithEmailAndPassword(
+                email: _emailTextController.text.trim().toLowerCase(),
+                password: _passTextController.text.trim(),
+              );
+              final User? user = _auth.currentUser;
+              final _uid = user!.uid;
+              final ref = FirebaseStorage.instance.ref().child('userImages').child(_uid + '.jpg');
+              await ref.putFile(imageFile!);
+              imageUrl = await ref.getDownloadURL();
+              FirebaseFirestore.instance.collection('users').doc(_uid).set({
+                'id': _uid,
+                'name': _fullNameController.text,
+                'email': _emailTextController.text,
+                'phoneNumber': _phoneNumberController.text,
+                'location': _locationController.text,
+                'imageUrl': imageUrl,
+                'createdAt': Timestamp.now(),
+              });
+              Navigator.canPop(context) ? Navigator.pop(context) : null;
+
+            }
+            catch (error)
+    {
+      setState(() {
+        _isLoading = false;
+      });
+      GlobalMethod.showErrorDialog(
+        error: error.toString(),
+        ctx: context,
+      );
+    }
+      }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -418,7 +490,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                             :
                             MaterialButton(
                               onPressed: () {
-                                // Create submit function
+                                _submitFormOnSignUp();
                               },
                               color: Colors.cyan,
                               elevation: 8,
