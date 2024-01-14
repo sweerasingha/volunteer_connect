@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:vc_v1/ForgetPassword/forget_password_screen.dart';
 import 'package:vc_v1/Services/global_variables.dart';
 
 class Login extends StatefulWidget {
@@ -12,6 +13,13 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
 
   late Animation<double> _animation;
   late AnimationController _animationController;
+
+  final TextEditingController _emailTextController = TextEditingController(text: '');
+  final TextEditingController _passTextController = TextEditingController(text: '');
+
+  final FocusNode _passFocusNode = FocusNode();
+  bool _obscureText = true;
+  final _loginFormKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -54,8 +62,140 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
               fit: BoxFit.cover,
               alignment: FractionalOffset(_animation.value, 0),
             ),
-          ]
-        )
+            Container(
+              color: Colors.black54,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 80),
+                  child: ListView(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 80, right: 80),
+                        child: Image.asset('assets/images/login.png'),
+                      ),
+                      const SizedBox(height:15,),
+                      Form(
+                        key: _loginFormKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              textInputAction: TextInputAction.next,
+                              onEditingComplete: () => FocusScope.of(context).requestFocus(_passFocusNode),
+                              keyboardType: TextInputType.emailAddress,
+                              controller: _emailTextController,
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please enter your email address';
+                                } else if (!value.contains('@')) {
+                                  return 'Please enter a valid email address';
+                                }
+                                return null;
+                              },
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Email',
+                                hintStyle: TextStyle(
+                                  color: Colors.white,
+                                ),
+                                enabledBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                errorBorder: UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 5,),
+                            TextFormField(
+                              textInputAction: TextInputAction.next,
+                              focusNode: _passFocusNode,
+                              keyboardType: TextInputType.visiblePassword,
+                              controller: _passTextController,
+                              obscureText: !_obscureText, // Change it dynamically
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Please enter your password';
+                                } else if (value.length < 6) {
+                                  return 'Password must be at least 6 characters';
+                                }
+                                return null;
+                              },
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                              decoration: InputDecoration(
+                                suffixIcon: GestureDetector(
+                                  onTap: () {
+                                    // Update the state i.e. toogle the state of passwordVisible variable
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                  child: Icon(
+                                    // Based on passwordVisible state choose the icon
+                                    _obscureText
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                hintText: 'Password',
+                                hintStyle: const TextStyle(
+                                  color: Colors.white,
+                                ),
+                                enabledBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                focusedBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                errorBorder: const UnderlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15,),
+                            Align(
+                              alignment: Alignment.bottomRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => ForgetPassword()));
+                                },
+                                child: const Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontStyle: FontStyle.italic,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ),
+          ],
+        ),
     );
   }
 }

@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Volunteer Connect',
           theme: ThemeData(
-            scaffoldBackgroundColor: Colors.red,
+            scaffoldBackgroundColor: Colors.black,
             primarySwatch: Colors.blue,
           ),
           home: Login(),
