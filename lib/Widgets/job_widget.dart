@@ -1,4 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:vc_v1/Services/global_methods.dart';
+
+import '../Jobs/jobs_details.dart';
 
 class JobWidget extends StatefulWidget {
 
@@ -29,6 +35,77 @@ class JobWidget extends StatefulWidget {
 }
 
 class _JobWidgetState extends State<JobWidget> {
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  _deleteDialog()
+  {
+    User? user = _auth.currentUser;
+    final _uid = user!.uid;
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          actions: [
+            TextButton(
+              onPressed: () async {
+                if (!mounted) return; // Add this check to ensure the widget is still in the tree
+
+                try {
+                  if (widget.uploadedBy == _uid) {
+                    await FirebaseFirestore.instance.collection('jobs').doc(widget.jobId).delete();
+                    await Fluttertoast.showToast(
+                      msg: 'Job deleted successfully',
+                      toastLength: Toast.LENGTH_LONG,
+                      backgroundColor: Colors.grey,
+                      textColor: Colors.white,
+                      fontSize: 18.0,
+                    );
+
+                    if (mounted) { // Check again before calling Navigator
+                      Navigator.canPop(context) ? Navigator.pop(context) : null;
+                    }
+                  } else {
+                    GlobalMethod.showErrorDialog(
+                      error: 'You are not authorized to delete this job',
+                      ctx: ctx,
+                    );
+                  }
+                } catch (error) {
+                  print('error occured $error');
+                  if (mounted) { // Check again before showing the error dialog
+                    GlobalMethod.showErrorDialog(
+                      error: error.toString(),
+                      ctx: ctx,
+                    );
+                  }
+                }
+              },
+
+              child: const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                    size: 30,
+                  ),
+                  Text(
+                    'Delete',
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     print("test all ");
@@ -49,8 +126,21 @@ class _JobWidgetState extends State<JobWidget> {
         vertical: 8,
       ),
       child: ListTile(
-        onTap: () {},
-        onLongPress: () {},
+        onTap: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => JobDetailsScreen(
+                uploadedBy: widget.uploadedBy,
+                jobId: widget.jobId,
+              ),
+            ),
+          );
+
+        },
+        onLongPress: () {
+          _deleteDialog();
+        },
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 10,
