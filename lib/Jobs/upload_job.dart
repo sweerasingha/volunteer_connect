@@ -1,6 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:uuid/uuid.dart';
 import 'package:vc_v1/Persistent/persistent.dart';
 
+import '../Services/global_methods.dart';
+import '../Services/global_variables.dart';
 import '../Widgets/bottom_nav_bar.dart';
 
 class UploadJobNow extends StatefulWidget {
@@ -11,15 +17,28 @@ class UploadJobNow extends StatefulWidget {
 
 class _UploadJobNowState extends State<UploadJobNow> {
 
-  final TextEditingController _jobCategoryController = TextEditingController(text: 'Select Job Category');
+  final TextEditingController _jobCategoryController = TextEditingController(
+      text: 'Select Job Category');
   final TextEditingController _jobTitleController = TextEditingController();
   final TextEditingController _jobDescriptionController = TextEditingController();
-  final TextEditingController _jobDeadlineController = TextEditingController();
+  final TextEditingController _jobDeadlineController = TextEditingController(
+      text: 'Select Deadline Date');
 
   final _formKey = GlobalKey<FormState>();
+  DateTime? picked;
+  Timestamp? deadLineDateTimeStamp;
   bool _isLoading = false;
 
-  Widget _textTitles({required String label}){
+  void dispose()
+  {
+    _jobCategoryController.dispose();
+    _jobTitleController.dispose();
+    _jobDescriptionController.dispose();
+    _jobDeadlineController.dispose();
+    super.dispose();
+  }
+
+  Widget _textTitles({required String label}) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Text(
@@ -39,22 +58,20 @@ class _UploadJobNowState extends State<UploadJobNow> {
     required bool enabled,
     required Function fct,
     required int maxLength,
-}){
+  }) {
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: InkWell(
-        onTap: (){
+        onTap: () {
           fct();
         },
         child: TextFormField(
-          validator: (value)
-              {
-                if(value!.isEmpty)
-                  {
-                    return 'Value is missing';
-                  }
-                return null;
-              },
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Value is missing';
+            }
+            return null;
+          },
           controller: controller,
           enabled: enabled,
           key: ValueKey(valueKey),
@@ -62,6 +79,7 @@ class _UploadJobNowState extends State<UploadJobNow> {
             color: Colors.white,
           ),
           maxLines: valueKey == 'JobDescription' ? 3 : 1,
+          // maxLength: valueKey == 'JobCategory' ? null : maxLength,
           maxLength: maxLength,
           keyboardType: TextInputType.text,
           decoration: const InputDecoration(
@@ -89,12 +107,10 @@ class _UploadJobNowState extends State<UploadJobNow> {
     );
   }
 
-  _showTaskCategoriesDialog({required Size size})
-  {
+  _showTaskCategoriesDialog({required Size size}) {
     showDialog(
-      context: context,
-      builder: (ctx)
-        {
+        context: context,
+        builder: (ctx) {
           return AlertDialog(
             backgroundColor: Colors.black54,
             title: const Text(
@@ -105,14 +121,14 @@ class _UploadJobNowState extends State<UploadJobNow> {
             content: Container(
               width: size.width * 0.9,
               child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: Persistent.jobCategoryList.length,
-                itemBuilder: (ctx, index)
-                  {
+                  shrinkWrap: true,
+                  itemCount: Persistent.jobCategoryList.length,
+                  itemBuilder: (ctx, index) {
                     return InkWell(
-                      onTap: (){
+                      onTap: () {
                         setState(() {
-                          _jobCategoryController.text = Persistent.jobCategoryList[index];
+                          _jobCategoryController.text = Persistent
+                              .jobCategoryList[index];
                         });
                         Navigator.pop(context);
                       },
@@ -138,10 +154,116 @@ class _UploadJobNowState extends State<UploadJobNow> {
                   }
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.canPop(context) ? Navigator.pop(context) : null;
+                },
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
           );
         }
     );
   }
+
+  void _pickDateDialog() async
+  {
+    picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now().subtract(
+        const Duration(days: 0),
+      ),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        _jobDeadlineController.text =
+        '${picked!.year} - ${picked!.month} - ${picked!.day}';
+        deadLineDateTimeStamp = Timestamp.fromMicrosecondsSinceEpoch(
+            picked!.microsecondsSinceEpoch);
+      });
+    }
+  }
+
+  void _uploadTask() async
+  {
+    final jobId = const Uuid().v4();
+    User? user = FirebaseAuth.instance.currentUser;
+    final _uid = user!.uid;
+    final isValid = _formKey.currentState!.validate();
+
+    if (isValid) {
+      if (_jobDeadlineController.text == 'Select Deadline Date' ||
+          _jobCategoryController.text == 'Select Job Category') {
+        GlobalMethod.showErrorDialog(
+            error: 'Please select a deadline date and a job category',
+            ctx: context);
+        return;
+      }
+      setState(() {
+        _isLoading = true;
+      });
+      try {
+        await FirebaseFirestore.instance.collection('jobs').doc(jobId).set({
+          'jobId': jobId,
+          'uploadedBy': _uid,
+          'email': user.email,
+          'jobCategory': _jobCategoryController.text,
+          'jobTitle': _jobTitleController.text,
+          'jobDescription': _jobDescriptionController.text,
+          'jobDeadline': _jobDeadlineController.text,
+          'jobDeadlineTimeStamp': deadLineDateTimeStamp,
+          'jobComments': [],
+          'recruitment': true,
+          'createdAt': Timestamp.now(),
+          'name': name,
+          'userImage': userImage,
+          'location': location,
+          'applicants': 0,
+        });
+        await Fluttertoast.showToast(
+          msg: 'Job uploaded successfully',
+          toastLength: Toast.LENGTH_LONG,
+          backgroundColor: Colors.grey,
+          fontSize: 18.0,
+        );
+        _jobTitleController.clear();
+        _jobDescriptionController.clear();
+        setState(() {
+          _jobCategoryController.text = 'Select Job Category';
+          _jobDeadlineController.text = 'Select Deadline Date';
+        });
+      }
+      catch (error) {
+        {
+        setState(() {
+          _isLoading = false;
+        });
+        GlobalMethod.showErrorDialog(error: error.toString(), ctx: context);
+      }
+      }
+
+    finally
+    {
+    setState(() {
+    _isLoading = false;
+    });
+    }
+  }
+
+  else
+  {
+  print("It is not valid ");
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -160,28 +282,6 @@ class _UploadJobNowState extends State<UploadJobNow> {
       child: Scaffold(
         bottomNavigationBar: BottomNavigationBarForApp(indexNum: 2,),
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(
-            "Upload Job Now",
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Signatra'
-            ),
-          ),
-          centerTitle: true,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepOrange.shade300, Colors.blueAccent],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                stops: const [0.2,0.9],
-              ),
-            ),
-          ),
-        ),
         body: Center(
           child: Padding(
             padding: EdgeInsets.all(7.0),
@@ -248,8 +348,10 @@ class _UploadJobNowState extends State<UploadJobNow> {
                             _textFormFields(
                               valueKey: 'Deadline',
                               controller: _jobDeadlineController,
-                              enabled: true,
-                              fct: (){},
+                              enabled: false,
+                              fct: (){
+                                _pickDateDialog();
+                              },
                               maxLength: 100,
                             ),
                           ],
@@ -262,7 +364,9 @@ class _UploadJobNowState extends State<UploadJobNow> {
                         child: _isLoading
                           ? const CircularProgressIndicator()
                             : MaterialButton(
-                          onPressed: (){},
+                          onPressed: (){
+                            _uploadTask();
+                          },
                           color: Colors.black,
                           elevation: 8,
                           shape: RoundedRectangleBorder(
