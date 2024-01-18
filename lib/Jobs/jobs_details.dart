@@ -8,6 +8,7 @@ import 'package:vc_v1/Jobs/jobs_screen.dart';
 import 'package:vc_v1/Services/global_methods.dart';
 
 import '../Services/global_variables.dart';
+import '../Widgets/comments_widget.dart';
 
 class JobDetailsScreen extends StatefulWidget {
 
@@ -681,7 +682,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                                   IconButton(
                                     onPressed: (){
                                       setState(() {
-                                        showComment = false;
+                                        showComment = true;
                                       });
                                     },
                                     icon: const Icon(
@@ -693,6 +694,66 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
                                 ],
                               ),
                         ),
+                        showComment == false
+                            ?
+                        Container()
+                            :
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: FutureBuilder<DocumentSnapshot>(
+                                future: FirebaseFirestore.instance
+                                    .collection('jobs')
+                                    .doc(widget.jobId)
+                                    .get(),
+                                builder: (context, snapshot)
+                                  {
+                                    if(snapshot.connectionState == ConnectionState.waiting)
+                                      {
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    else
+                                      {
+                                        if(snapshot.data == null)
+                                          {
+                                            const Center(
+                                              child: Text(
+                                                'No comments yet',
+                                                style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                        return ListView.separated(
+                                          shrinkWrap: true,
+                                          physics: const NeverScrollableScrollPhysics(),
+                                          itemBuilder: (context, index)
+                                            {
+                                              return CommentWidget(
+                                                commentId: snapshot.data!['jobComments'][index]['commentId'],
+                                                commentorId: snapshot.data!['jobComments'][index]['userID'],
+                                                commentorName: snapshot.data!['jobComments'][index]['name'],
+                                                commentBody: snapshot.data!['jobComments'][index]['commentBody'],
+                                                commentorImageUrl: snapshot.data!['jobComments'][index]['userImageUrl'],
+                                              );
+                                            },
+                                          separatorBuilder: (context, index)
+                                            {
+                                              return const Divider(
+                                                thickness: 1,
+                                                color: Colors.grey,
+                                              );
+                                            },
+                                          itemCount: snapshot.data!['jobComments'].length,
+                                        );
+                                      },
+                              ),
+                            ),
                       ],
                     ),
                   ),

@@ -105,6 +105,15 @@ class _JobScreenState extends State<JobScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    Persistent persistentObject = Persistent();
+    persistentObject.getMyData();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
 
     Size size = MediaQuery.of(context).size;
