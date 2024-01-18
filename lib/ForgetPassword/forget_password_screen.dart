@@ -132,7 +132,7 @@ class _ForgetPasswordState extends State<ForgetPassword> with TickerProviderStat
                       {
                         _forgetPasswordSubmitForm();
                       },
-                  color: Colors.cyan,
+                  color: Colors.redAccent,
                   elevation: 8,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(13),

@@ -228,7 +228,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                               onPressed: () {
                                 _submitFormOnLogin();
                               },
-                              color: Colors.cyan,
+                              color: Colors.redAccent,
                               elevation: 8,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(11),
@@ -269,7 +269,7 @@ class _LoginState extends State<Login> with TickerProviderStateMixin{
                                         ..onTap = () => Navigator.push(context, MaterialPageRoute(builder: (context) => SignUp())),
                                       text: 'Sign Up',
                                       style: const TextStyle(
-                                        color: Colors.cyan,
+                                        color: Colors.redAccent,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),

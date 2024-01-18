@@ -148,7 +148,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.deepOrange.shade300, Colors.blueAccent],
+          colors: [Colors.redAccent.shade200, Colors.red.shade800],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           stops: const [0.2,0.9],
@@ -160,7 +160,7 @@ class _JobDetailsScreenState extends State<JobDetailsScreen> {
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.deepOrange.shade300, Colors.blueAccent],
+                colors: [Colors.redAccent.shade200, Colors.red.shade800],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 stops: const [0.2,0.9],

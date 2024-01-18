@@ -258,13 +258,13 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                               width: size.width * 0.24,
                               height: size.width * 0.24,
                               decoration: BoxDecoration(
-                                border: Border.all(color: Colors.cyanAccent, width: 1),
+                                border: Border.all(color: Colors.redAccent, width: 1),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(16),
                                 child: imageFile == null
-                                    ? const Icon(Icons.camera_enhance_sharp, color: Colors.cyan , size: 30,)
+                                    ? const Icon(Icons.camera_enhance_sharp, color: Colors.red , size: 30,)
                                     : Image.file(imageFile!, fit: BoxFit.fill,),
                               )
                             ),
@@ -492,7 +492,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                               onPressed: () {
                                 _submitFormOnSignUp();
                               },
-                              color: Colors.cyan,
+                              color: Colors.redAccent,
                               elevation: 8,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(13),
@@ -537,7 +537,7 @@ class _SignUpState extends State<SignUp> with TickerProviderStateMixin{
                                         : null,
                                   text: 'Login',
                                   style: const TextStyle(
-                                    color: Colors.cyan,
+                                    color: Colors.redAccent,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                   ),
