@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttericon/font_awesome_icons.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:vc_v1/user_state.dart';
 
 import '../Widgets/bottom_nav_bar.dart';
@@ -105,6 +107,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _contactBy
+      ({
+    required Color color,
+    required Function fct,
+    required IconData icon,
+      })
+  {
+    return CircleAvatar(
+      backgroundColor: color,
+      radius: 25,
+      child: CircleAvatar(
+        backgroundColor: Colors.white,
+        radius: 23,
+        child: IconButton(
+          onPressed: (){
+            fct();
+          },
+          icon: Icon(
+            icon,
+            color: color,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _openWhatsAppChat() async
+  {
+    var url = 'https://wa.me/$phoneNumber?text=HelloWold';
+    launchUrlString(url);
+  }
+
+  void _mailTo() async
+  {
+    final Uri params = Uri(
+      scheme: 'mailto',
+      path: email,
+      query: 'subject=Write subject here, Please&body=Hello, please write details here',
+    );
+    final url = params.toString();
+    launchUrlString(url);
+  }
+
+  void _call() async
+  {
+    var url = 'tel://$phoneNumber';
+    launchUrlString(url);
+  }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -190,12 +242,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 child: userInfo(icon: Icons.phone, content: phoneNumber == null ? 'Phone number here' : phoneNumber!),
                               ),
                               const SizedBox(
-                                height: 25,
+                                height: 15,
                               ),
                               const Divider(
                                 color: Colors.white,
                                 thickness: 1,
                               ),
+                              const SizedBox(
+                                height: 35,
+                              ),
+                              _isSameUser
+                                  ?
+                                  Container()
+                                  :
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _contactBy(color: Colors.green, fct: _openWhatsAppChat, icon: FontAwesome.whatsapp),
+                                      _contactBy(color: Colors.red, fct: _mailTo, icon: Icons.mail_outline),
+                                      _contactBy(color: Colors.blue, fct: _call, icon: Icons.call),
+                                    ],
+                                  ),
                               const SizedBox(
                                 height: 25,
                               ),
