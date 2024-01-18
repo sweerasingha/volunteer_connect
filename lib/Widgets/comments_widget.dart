@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vc_v1/Search/pofile_company.dart';
 
 class CommentWidget extends StatefulWidget {
 
@@ -46,7 +47,9 @@ class _CommentWidgetState extends State<CommentWidget> {
   Widget build(BuildContext context) {
     _colors.shuffle();
     return InkWell(
-      onTap: (){},
+      onTap: (){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> ProfileScreen(userId: widget.commentorId,)));
+      },
       child:Row(
         crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisAlignment: MainAxisAlignment.start,
